@@ -23,39 +23,6 @@ namespace ExcelRuntimeImporter
             }
         }
 
-        static List<ExcelAssetInfo> cachedInfos = null; // Clear on compile.
-
-
-        static List<ExcelAssetInfo> FindExcelAssetInfos()
-        {
-            var list = new List<ExcelAssetInfo>();
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (var type in assembly.GetTypes())
-                {
-                    var attributes = type.GetCustomAttributes(typeof(ExcelAssetAttribute), false);
-                    if (attributes.Length == 0) continue;
-                    var attribute = (ExcelAssetAttribute)attributes[0];
-                    var info = new ExcelAssetInfo()
-                    {
-                        AssetType = type,
-                        Attribute = attribute
-                    };
-                    list.Add(info);
-                }
-            }
-            return list;
-        }
-
-        //static IWorkbook LoadBook(string excelPath)
-        //{
-        //    using (FileStream stream = File.Open(excelPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-        //    {
-        //        if (Path.GetExtension(excelPath) == ".xls") return new HSSFWorkbook(stream);
-        //        else return new XSSFWorkbook(stream);
-        //    }
-        //}
-
         static List<string> GetFieldNamesFromSheetHeader(ISheet sheet)
         {
             IRow headerRow = sheet.GetRow(0);
