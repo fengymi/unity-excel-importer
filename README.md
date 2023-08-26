@@ -11,7 +11,7 @@ Add the following entry to Packages/manifest.json or Package Manager.
 ```json
 {
   "dependencies": {
-    "net.mikinya.unity-excel-importer": "https://github.com/mikito/unity-excel-importer.git?path=Assets/ExcelImporter#v0.1.1/upm",
+    "net.mikinya.unity-excel-importer": "https://github.com/secrectFG/unity-excel-importer.git?path=Assets/ExcelImporter#v0.1.1/upm",
     ...
   }
 }
