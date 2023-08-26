@@ -38,3 +38,6 @@ sysinfo.txt
 ~$*.xlsx.meta
 ~$*.xls
 ~$*.xls.meta
+/python自动填充
+/.vsconfig
+/.vs

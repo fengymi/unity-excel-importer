@@ -37,6 +37,8 @@ public class ExcelImporter : AssetPostprocessor
 
 				var excelName = Path.GetFileNameWithoutExtension(path);
 				if(excelName.StartsWith("~$")) continue;
+				//如果在StreamingAssets中，不导入
+				if(path.Contains("StreamingAssets")) continue;
 
 				ExcelAssetInfo info = cachedInfos.Find(i => i.ExcelName == excelName);
 
