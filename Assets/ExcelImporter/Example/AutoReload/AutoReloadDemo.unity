@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 186072464}
   - component: {fileID: 186072463}
   m_Layer: 0
-  m_Name: Test
+  m_Name: ConfigDatas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -149,11 +149,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 186072462}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a200e2356cdaa5845862f8f8f4d31da1, type: 3}
+  m_Script: {fileID: 11500000, guid: 604afaae424070d4e874086569330007, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyDataScriptableObject: {fileID: 11400000, guid: 025ff4e3b2f73ac4fa3c009425535e64,
-    type: 2}
+  pathOfEnemyTable: "/Datas/\u602A\u7269\u8868.xlsx"
+  pathOfWeaponTable: "/Datas/\u6B66\u5668\u8868.xlsx"
+  reloadSecondFrequency: 1
+  showDebugLog: 1
 --- !u!4 &186072464
 Transform:
   m_ObjectHideFlags: 0

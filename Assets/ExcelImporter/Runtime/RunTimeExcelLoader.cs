@@ -7,6 +7,7 @@ namespace ExcelRuntimeTools
     using System.IO;
     using System.Reflection;
     using NPOI.SS.UserModel;
+    using System.Linq;
 
     public class ExcelLoader 
     {
@@ -66,12 +67,11 @@ namespace ExcelRuntimeTools
         {
             var entity = Activator.CreateInstance(entityType);
 
+            var fields = entityType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
             for (int i = 0; i < columnNames.Count; i++)
             {
-                FieldInfo entityField = entityType.GetField(
-                    columnNames[i],
-                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
-                );
+                FieldInfo entityField = fields.FirstOrDefault(f => f.Name == columnNames[i]);
                 if (entityField == null) continue;
                 if (!entityField.IsPublic && entityField.GetCustomAttributes(typeof(SerializeField), false).Length == 0) continue;
 
