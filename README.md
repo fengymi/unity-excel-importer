@@ -6,6 +6,10 @@ Unity Excel Importer
 增加定时读取更新的Demo，实时读取数据变化，方便修改看结果
 原版需要字段名和字段顺序和C# class对应才能读取，现在改为只需要字段名对应即可
 
+
+以下是原版说明
+====================
+
 Extension for auto import data from xls, xlsx to custom ScriptableObject in Unity Editor.
 
 
