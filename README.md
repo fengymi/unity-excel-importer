@@ -6,6 +6,9 @@ Unity Excel Importer
 增加定时读取更新的Demo，实时读取数据变化，方便修改看结果
 原版需要字段名和字段顺序和C# class对应才能读取，现在改为只需要字段名对应即可
 
+安装方法：
+从Unity Package Manager中，选择Add package from git URL... 粘贴以下地址：
+https://github.com/secrectFG/unity-excel-importer.git?path=Assets/ExcelImporter
 
 以下是原版说明
 ====================
