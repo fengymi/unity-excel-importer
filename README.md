@@ -12,6 +12,8 @@ Unity Excel Importer
 
 https://github.com/secrectFG/unity-excel-importer.git?path=Assets/ExcelImporter
 
+例子：https://github.com/secrectFG/Unity-Excel-Example.git
+
 以下是原版说明
 ====================
 
