@@ -4,4 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/ExcelImporter/Example/Example.unity
+    guid: ea584fca576e04dbb8273b395add123a
+  m_configObjects: {}

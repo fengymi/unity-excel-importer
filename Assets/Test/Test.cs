@@ -12,48 +12,48 @@ public class Test : MonoBehaviour
         Debug.Log(enemyDataScriptableObject.EnemyDataEntityDic.Count);
 
         var stopwatch =  System.Diagnostics.Stopwatch.StartNew();
-        var path =  Application.streamingAssetsPath + "/EnemyDataEntities.xlsx";//pythonÉú³ÉµÄ±í¸ñ
+        var path =  Application.streamingAssetsPath + "/EnemyDataEntities.xlsx";//pythonç”Ÿæˆçš„è¡¨æ ¼
         var pathEnemyData = Application.streamingAssetsPath + "/EnemyData.xlsx";
         var data = ExcelRuntimeTools.ExcelLoader.LoadExcel<EnemyData>(path);
-        Debug.Log($"¼ÓÔØºÄÊ±:{stopwatch.ElapsedMilliseconds}ms");
+        Debug.Log($"åŠ è½½è€—æ—¶:{stopwatch.ElapsedMilliseconds}ms");
         
 
         stopwatch = System.Diagnostics.Stopwatch.StartNew();
         data = ExcelRuntimeTools.ExcelLoader.LoadExcel<EnemyData>(path);
-        Debug.Log($"¶ş´Î¼ÓÔØºÄÊ±:{stopwatch.ElapsedMilliseconds}ms");
+        Debug.Log($"äºŒæ¬¡åŠ è½½è€—æ—¶:{stopwatch.ElapsedMilliseconds}ms");
 
         stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        //²âÊÔ·¢ÏÖÖ»ÄÜ¼õÉÙ5ms×óÓÒ
+        //æµ‹è¯•å‘ç°åªèƒ½å‡å°‘5mså·¦å³
         using (var fs = File.OpenRead(path))
         {
             var data2 = ExcelRuntimeTools.ExcelLoader.LoadExcel<EnemyData, EnemyDataEntity>(fs);
-            Debug.Log($"¼õÉÙ·´Éä¼ÓÔØÊ±¼ä:{stopwatch.ElapsedMilliseconds}ms");
+            Debug.Log($"å‡å°‘åå°„åŠ è½½æ—¶é—´:{stopwatch.ElapsedMilliseconds}ms");
         }
 
-        //´òÓ¡Êı¾İ
+        //æ‰“å°æ•°æ®
         //foreach (var item in data.EnemyDataEntities)
         //{
-        //    Debug.Log($"Id:{item.Id} Name:{item.Name} Health:{item.Health} Exp:{item.Exp} Attack:{item.Attack} ÖĞÎÄ²âÊÔ:{item.ÖĞÎÄ²âÊÔ} ");
+        //    Debug.Log($"Id:{item.Id} Name:{item.Name} Health:{item.Health} Exp:{item.Exp} Attack:{item.Attack} ä¸­æ–‡æµ‹è¯•:{item.ä¸­æ–‡æµ‹è¯•} ");
         //}
 
 
         var dic = new Dictionary<int, EnemyDataEntity>();
         ExcelRuntimeTools.ExcelLoader.LoadToDictionary(dic, pathEnemyData);
-        Debug.Log($"×ÖµäÊıÁ¿:{dic.Count}");
+        Debug.Log($"å­—å…¸æ•°é‡:{dic.Count}");
 
         foreach (var item in dic)
         {
-            Debug.Log($"Key:{item.Key} Id:{item.Value.Id} Name:{item.Value.Name} Health:{item.Value.Health} Exp:{item.Value.Exp} Attack:{item.Value.Attack} ÖĞÎÄ²âÊÔ:{item.Value.ÖĞÎÄ²âÊÔ} ");
+            Debug.Log($"Key:{item.Key} Id:{item.Value.Id} Name:{item.Value.Name} Health:{item.Value.Health} Exp:{item.Value.Exp} Attack:{item.Value.Attack} ä¸­æ–‡æµ‹è¯•:{item.Value.ä¸­æ–‡æµ‹è¯•} ");
         }
         stopwatch = System.Diagnostics.Stopwatch.StartNew();
         var list = new List<EnemyDataEntity>();
         ExcelRuntimeTools.ExcelLoader.LoadToList(list, path);
-        Debug.Log($"¼ÓÔØÊ±¼ä1:{stopwatch.ElapsedMilliseconds}ms");
-        Debug.Log($"ÁĞ±íÊıÁ¿:{list.Count}");
+        Debug.Log($"åŠ è½½æ—¶é—´1:{stopwatch.ElapsedMilliseconds}ms");
+        Debug.Log($"åˆ—è¡¨æ•°é‡:{list.Count}");
 
         //foreach (var item in list)
         //{
-        //    Debug.Log($"Id:{item.Id} Name:{item.Name} Health:{item.Health} Exp:{item.Exp} Attack:{item.Attack} ÖĞÎÄ²âÊÔ:{item.ÖĞÎÄ²âÊÔ} ");
+        //    Debug.Log($"Id:{item.Id} Name:{item.Name} Health:{item.Health} Exp:{item.Exp} Attack:{item.Attack} ä¸­æ–‡æµ‹è¯•:{item.ä¸­æ–‡æµ‹è¯•} ");
         //}
         stopwatch = System.Diagnostics.Stopwatch.StartNew();
         using (var fs = File.OpenRead(path))
@@ -61,8 +61,8 @@ public class Test : MonoBehaviour
             
             var list2 = new List<EnemyDataEntity>();
             ExcelRuntimeTools.ExcelLoader.LoadToList(list2, fs);
-            Debug.Log($"¼ÓÔØÊ±¼ä2:{stopwatch.ElapsedMilliseconds}ms");
-            Debug.Log($"ÁĞ±íÊıÁ¿:{list2.Count}");
+            Debug.Log($"åŠ è½½æ—¶é—´2:{stopwatch.ElapsedMilliseconds}ms");
+            Debug.Log($"åˆ—è¡¨æ•°é‡:{list2.Count}");
         }
     }
 }

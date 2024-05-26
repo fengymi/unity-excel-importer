@@ -11,7 +11,7 @@ public class EnemyDataEntity
     public int Health;
     public int Exp;
     public int Attack;
-    public int ÖĞÎÄ²âÊÔ;//¼æÈİĞÔ²î£¬²»½¨ÒéÊ¹ÓÃ(PythonÉú³ÉµÄ±í¸ñ°üº¬ÖĞÎÄ»á¼ÓÔØÊ§°Ü£¬Ô­ÒòÎ´Öª£¬¿ÉÄÜÊÇ±àÂëÎÊÌâ)
+    public int ä¸­æ–‡æµ‹è¯•;//å…¼å®¹æ€§å·®ï¼Œä¸å»ºè®®ä½¿ç”¨(Pythonç”Ÿæˆçš„è¡¨æ ¼åŒ…å«ä¸­æ–‡ä¼šåŠ è½½å¤±è´¥ï¼ŒåŸå› æœªçŸ¥ï¼Œå¯èƒ½æ˜¯ç¼–ç é—®é¢˜)
 }
 
 
