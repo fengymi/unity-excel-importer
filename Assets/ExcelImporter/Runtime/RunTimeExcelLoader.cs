@@ -9,7 +9,7 @@ namespace ExcelRuntimeTools
     using NPOI.SS.UserModel;
     using System.Linq;
 
-    public class ExcelLoader 
+    public class ExcelLoader
     {
         class ExcelAssetInfo
         {
@@ -125,6 +125,10 @@ namespace ExcelRuntimeTools
 
             var entityType = typeof(EntityType);
 
+            //用于解决一些人喜欢把前面几行合并的问题，让代码多搜索几行吧
+            bool foundFirstRow = false;
+            var searchFirstRowCount = 100;
+
             // row of index 0 is header
             for (int i = 1; i <= sheet.LastRowNum; i++)
             {
@@ -132,8 +136,22 @@ namespace ExcelRuntimeTools
                 if (row == null) break;
 
                 ICell entryCell = row.GetCell(0);
-                if (entryCell == null || entryCell.CellType == CellType.Blank) break;
-
+                if (entryCell == null || entryCell.CellType == CellType.Blank)
+                {
+                    if (foundFirstRow) break;
+                    else
+                    {
+                        searchFirstRowCount--;
+                        if (searchFirstRowCount == 0)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                }
                 // skip comment row
                 if (entryCell.CellType == CellType.String && entryCell.StringCellValue.StartsWith("#")) continue;
 
@@ -193,7 +211,7 @@ namespace ExcelRuntimeTools
 
                 var entity = CreateEntityFromRow(row, excelColumnNames, entityType, sheet.SheetName);
 
-                
+
                 var keyField = entityType.GetField(keyFieldName);
                 var key = (Key)keyField.GetValue(entity);
 
@@ -258,7 +276,7 @@ namespace ExcelRuntimeTools
             }
         }
 
-        //��bytes��ȡ
+        //��bytes��ȡ
         public static T LoadExcel<T>(byte[] bytes) where T : class
         {
             using (MemoryStream stream = new MemoryStream(bytes))
@@ -267,7 +285,7 @@ namespace ExcelRuntimeTools
             }
         }
 
-        //���ļ���ȡ
+        //���ļ���ȡ
         public static T LoadExcel<T>(string excelPath) where T : class
         {
             using (FileStream stream = File.Open(excelPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -276,7 +294,7 @@ namespace ExcelRuntimeTools
             }
         }
 
-        
+
 
         public static T LoadExcel<T, EntityType>(Stream stream) where T : class where EntityType : class
         {
@@ -316,7 +334,7 @@ namespace ExcelRuntimeTools
             return asset;
         }
 
-        public static T LoadExcel<T>(Stream stream) where T:class
+        public static T LoadExcel<T>(Stream stream) where T : class
         {
             T asset = Activator.CreateInstance<T>();
             IWorkbook book = WorkbookFactory.Create(stream);

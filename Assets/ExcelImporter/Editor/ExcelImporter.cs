@@ -175,20 +175,41 @@ public class ExcelImporter : AssetPostprocessor
 		List<string> excelColumnNames = GetFieldNamesFromSheetHeader(sheet);
 
 		Type listType = typeof(List<>).MakeGenericType(entityType);
-		MethodInfo listAddMethod = listType.GetMethod("Add", new Type[]{entityType});
+		MethodInfo listAddMethod = listType.GetMethod("Add", new Type[] { entityType });
 		object list = Activator.CreateInstance(listType);
+
+		//用于解决一些人喜欢把前面几行合并的问题，让代码多搜索几行吧
+		bool foundFirstRow = false;
+		var searchFirstRowCount = 100;
 
 		// row of index 0 is header
 		for (int i = 1; i <= sheet.LastRowNum; i++)
 		{
 			IRow row = sheet.GetRow(i);
-			if(row == null) break;
+			if (row == null) break;
 
-			ICell entryCell = row.GetCell(0); 
-			if(entryCell == null || entryCell.CellType == CellType.Blank) break;
+			ICell entryCell = row.GetCell(0);
+			if (entryCell == null || entryCell.CellType == CellType.Blank)
+			{
+				if (foundFirstRow) break;
+				else
+				{
+					searchFirstRowCount--;
+					if (searchFirstRowCount == 0)
+					{
+						break;
+					}
+					else
+					{
+						continue;
+					}
+				}
+			}
 
 			// skip comment row
-			if(entryCell.CellType == CellType.String && entryCell.StringCellValue.StartsWith("#")) continue;
+			if (entryCell.CellType == CellType.String && entryCell.StringCellValue.StartsWith("#")) continue;
+
+			foundFirstRow = true;
 
 			var entity = CreateEntityFromRow(row, excelColumnNames, entityType, sheet.SheetName);
 			listAddMethod.Invoke(list, new object[] { entity });
