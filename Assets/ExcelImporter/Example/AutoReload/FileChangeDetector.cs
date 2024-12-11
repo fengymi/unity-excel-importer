@@ -27,7 +27,7 @@ namespace AutoReloadDemo
             }
             catch (Exception e)
             {
-                if (e.Message.Contains("正在使用") || e.Message.ToLower().Contains("sharing"))
+                if (e.Message.Contains("姝ｅ湪浣跨敤") || e.Message.ToLower().Contains("sharing"))
                 {
                     string tempPath = Path.GetTempFileName();
                     File.Copy(filePath, tempPath, true);
@@ -49,7 +49,7 @@ namespace AutoReloadDemo
             }
             else
             {
-                Debug.LogError("FileChangeDetector.Detect 未知原因读取失败");
+                Debug.LogError("FileChangeDetector.Detect 鏈煡鍘熷洜璇诲彇澶辫触");
                 return false;
             }
 
@@ -67,7 +67,7 @@ namespace AutoReloadDemo
 
         static string GetHash(byte[] bytes)
         {
-            //计算哈希值，非MD5
+            //璁＄畻鍝堝笇鍊硷紝闈濵D5
             System.Security.Cryptography.SHA256Managed sha256 =
                 new System.Security.Cryptography.SHA256Managed();
             byte[] hash = sha256.ComputeHash(bytes);

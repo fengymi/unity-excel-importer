@@ -15,7 +15,7 @@ namespace AutoReloadDemo
         public Dictionary<string, T> ExcelDataDic { get; private set; } = new Dictionary<string, T>();
         FileChangeDetector fileChangeDetector;
         string keyFieldName;
-        
+
         public ExcelLoader(string path, string keyFieldName = "Name", bool showDebugLog = false)
         {
             fileChangeDetector = new FileChangeDetector(path);
@@ -27,9 +27,9 @@ namespace AutoReloadDemo
         public void Reload()
         {
             ExcelRuntimeTools.ExcelLoader.LoadToDictionary(ExcelDataDic, fileChangeDetector.bytes, keyFieldName: keyFieldName);
-            if(showDebugLog)
+            if (showDebugLog)
             {
-                Debug.Log($"¼ÓÔØÍê±Ï£¬¹²{ExcelDataDic.Count}ÌõÊı¾İ");
+                Debug.Log($"åŠ è½½å®Œæ¯•ï¼Œå…±{ExcelDataDic.Count}æ¡æ•°æ®");
                 foreach (var item in ExcelDataDic)
                 {
                     Debug.Log(item);
@@ -53,7 +53,7 @@ namespace AutoReloadDemo
                 ExcelDataDic = temp;
                 if (showDebugLog)
                 {
-                    Debug.Log($"¼ì²âµ½Êı¾İ±ä¶¯£¬ÖØĞÂ¼ÓÔØ£¬¹²{ExcelDataDic.Count}ÌõÊı¾İ");
+                    Debug.Log($"æ£€æµ‹åˆ°æ•°æ®å˜åŠ¨ï¼Œé‡æ–°åŠ è½½ï¼Œå…±{ExcelDataDic.Count}æ¡æ•°æ®");
                     foreach (var item in ExcelDataDic)
                     {
                         Debug.Log(item);
