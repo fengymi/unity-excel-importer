@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System;
@@ -12,6 +11,8 @@ using System.Linq;
 
 public class ExcelImporter : AssetPostprocessor
 {
+	// 持续空白行认为结束
+	private const int MaxContinueBlankRow = 30;
 	class ExcelAssetInfo
 	{
 		public Type AssetType { get; set; }
@@ -25,9 +26,16 @@ public class ExcelImporter : AssetPostprocessor
 		}
 	}
 
+	// 添加新的内部类来存储字段信息
+	class ExcelFieldInfo
+	{
+		public FieldInfo FieldInfo { get; set; }
+		public string SheetName { get; set; }
+	}
+
 	static List<ExcelAssetInfo> cachedInfos = null; // Clear on compile.
 
-    static void OnPostprocessAllAssets (string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
+    static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
 	{
 		bool imported = false;
 		foreach(string path in importedAssets)
@@ -129,6 +137,10 @@ public class ExcelImporter : AssetPostprocessor
 			case CellType.Boolean:
 				return cell.BooleanCellValue;
 			case CellType.Numeric:
+				if (fieldInfo.FieldType.IsEnum)
+				{
+					return Enum.ToObject(fieldInfo.FieldType, (int)cell.NumericCellValue);
+				}
 				return Convert.ChangeType(cell.NumericCellValue, fieldInfo.FieldType);
 			case CellType.Formula:
 				if(isFormulaEvalute) return null;
@@ -183,15 +195,34 @@ public class ExcelImporter : AssetPostprocessor
 		var searchFirstRowCount = 100;
 
 		// row of index 0 is header
+		var blankRowCount = 0;
 		for (int i = 1; i <= sheet.LastRowNum; i++)
 		{
 			IRow row = sheet.GetRow(i);
-			if (row == null) break;
+			if (row == null)
+			{
+				blankRowCount++;
+				if (blankRowCount >= MaxContinueBlankRow)
+				{
+					break;	
+				}
+					
+				continue;
+			}
 
 			ICell entryCell = row.GetCell(0);
 			if (entryCell == null || entryCell.CellType == CellType.Blank)
 			{
-				if (foundFirstRow) break;
+				if (foundFirstRow)
+				{
+					blankRowCount++;
+					if (blankRowCount >= MaxContinueBlankRow)
+					{
+						break;	
+					}
+					
+					continue;
+				}
 				else
 				{
 					searchFirstRowCount--;
@@ -205,6 +236,7 @@ public class ExcelImporter : AssetPostprocessor
 					}
 				}
 			}
+			blankRowCount = 0;
 
 			// skip comment row
 			if (entryCell.CellType == CellType.String && entryCell.StringCellValue.StartsWith("#")) continue;
@@ -234,22 +266,23 @@ public class ExcelImporter : AssetPostprocessor
 
 		IWorkbook book = LoadBook(excelPath);
 
-		var assetFields = info.AssetType.GetFields();
+		// 获取字段信息，包括ExcelSheetAttribute指定的Sheet名称
+		var assetFields = GetExcelFieldInfos(info.AssetType);
 		int sheetCount = 0;
 
-		foreach (var assetField in assetFields)
+		foreach (var fieldInfo in assetFields)
 		{
-			ISheet sheet =  book.GetSheet(assetField.Name);
+			ISheet sheet =  book.GetSheet(fieldInfo.SheetName);
 			if(sheet == null) continue;
 
-			Type fieldType = assetField.FieldType;
+			Type fieldType = fieldInfo.FieldInfo.FieldType;
 			if(! fieldType.IsGenericType || (fieldType.GetGenericTypeDefinition() != typeof(List<>))) continue;
 
 			Type[] types = fieldType.GetGenericArguments();
 			Type entityType = types[0];
 
 			object entities = GetEntityListFromSheet(sheet, entityType);
-			assetField.SetValue(asset, entities);
+			fieldInfo.FieldInfo.SetValue(asset, entities);
 			sheetCount++;
 		}
 
@@ -259,5 +292,28 @@ public class ExcelImporter : AssetPostprocessor
 		}
 
 		EditorUtility.SetDirty(asset);
+	}
+
+	// 新增方法：获取字段信息，包括ExcelSheetAttribute指定的Sheet名称
+	static List<ExcelFieldInfo> GetExcelFieldInfos(Type assetType)
+	{
+		var fieldInfos = new List<ExcelFieldInfo>();
+		var fields = assetType.GetFields();
+
+		foreach (var field in fields)
+		{
+			// 使用新的命名空间路径引用ExcelSheetAttribute
+			var sheetAttribute = (Attribute)Attribute.GetCustomAttribute(field, typeof(ExcelSheetAttribute));
+			var excelSheetAttribute = sheetAttribute as ExcelSheetAttribute;
+			var sheetName = excelSheetAttribute?.SheetName ?? field.Name;
+			
+			fieldInfos.Add(new ExcelFieldInfo
+			{
+				FieldInfo = field,
+				SheetName = sheetName
+			});
+		}
+
+		return fieldInfos;
 	}
 }
