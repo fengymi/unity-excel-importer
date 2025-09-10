@@ -132,8 +132,23 @@ public class ExcelImporter : AssetPostprocessor
 		switch(type)
 		{
 			case CellType.String:
-				if (fieldInfo.FieldType.IsEnum) return Enum.Parse(fieldInfo.FieldType, cell.StringCellValue);
-				else return cell.StringCellValue;
+				if (fieldInfo.FieldType.IsEnum)
+				{
+					return Enum.Parse(fieldInfo.FieldType, cell.StringCellValue);
+				}
+
+				if (fieldInfo.FieldType.IsArray)
+				{
+					return ParseArrayFromString(cell.StringCellValue, fieldInfo.FieldType);
+				}
+
+				// 处理嵌套对象 - 按JSON格式解析
+				if (IsNestedObject(fieldInfo.FieldType))
+				{
+					return ParseJsonObject(cell.StringCellValue, fieldInfo.FieldType);
+				}
+
+				return cell.StringCellValue;
 			case CellType.Boolean:
 				return cell.BooleanCellValue;
 			case CellType.Numeric:
@@ -152,6 +167,103 @@ public class ExcelImporter : AssetPostprocessor
 				}
 				return null;
 		}
+	}
+
+	// 新增方法：按JSON格式解析对象
+	static object ParseJsonObject(string json, Type objectType)
+	{
+		if (string.IsNullOrEmpty(json))
+		{
+			return null;
+		}
+
+		try
+		{
+			// var deserializeObject = JsonConvert.DeserializeObject(json, objectType);
+			// Debug.Log($"objectType.Name={objectType.Name} , json={json}, deserializeObject={deserializeObject}");
+			// return deserializeObject;
+			// return JsonMapper.ToObject(json);
+		
+			// 使用Unity的JsonUtility进行解析
+			var deserializeObject = JsonUtility.FromJson(json, objectType);
+			// Debug.Log($"objectType.Name={objectType.Name} , json={json}, deserializeObject={deserializeObject}");
+			return deserializeObject;
+		}
+		catch (Exception ex)
+		{
+			Debug.LogError($"Failed to parse JSON object of type {objectType.Name}: {ex.Message}\nJSON: {json}");
+			return null;
+		}
+	}
+
+	// 简化方法：判断是否是需要JSON解析的对象类型
+	static bool IsNestedObject(Type type)
+	{
+		// 只需要排除基本类型和集合类型即可
+		return !type.IsPrimitive && 
+			   type != typeof(string) && 
+			   !type.IsArray && 
+			   !(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>)) && 
+			   !type.IsEnum;
+	}
+
+	// 新增方法：从字符串解析数组，支持不同类型
+	static object ParseArrayFromString(string value, Type arrayType)
+	{
+		if (string.IsNullOrEmpty(value))
+		{
+			return Array.CreateInstance(arrayType.GetElementType(), 0);
+		}
+
+		string[] stringValues = value.Split(',');
+		Type elementType = arrayType.GetElementType();
+		Array resultArray = Array.CreateInstance(elementType, stringValues.Length);
+
+		for (int i = 0; i < stringValues.Length; i++)
+		{
+			string trimmedValue = stringValues[i].Trim();
+			
+			try
+			{
+				if (elementType == typeof(string))
+				{
+					resultArray.SetValue(trimmedValue, i);
+				}
+				else if (elementType == typeof(int))
+				{
+					resultArray.SetValue(int.Parse(trimmedValue), i);
+				}
+				else if (elementType == typeof(float))
+				{
+					resultArray.SetValue(float.Parse(trimmedValue), i);
+				}
+				else if (elementType == typeof(double))
+				{
+					resultArray.SetValue(double.Parse(trimmedValue), i);
+				}
+				else if (elementType == typeof(bool))
+				{
+					resultArray.SetValue(bool.Parse(trimmedValue), i);
+				}
+				else if (elementType.IsEnum)
+				{
+					resultArray.SetValue(Enum.Parse(elementType, trimmedValue), i);
+				}
+				else
+				{
+					// 对于其他类型，尝试使用Convert.ChangeType
+					resultArray.SetValue(Convert.ChangeType(trimmedValue, elementType), i);
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.LogWarning($"Failed to parse array element '{trimmedValue}' to type {elementType.Name}: {ex.Message}");
+				// 对于无法转换的值，使用默认值
+				resultArray.SetValue(elementType.IsValueType ? Activator.CreateInstance(elementType) : null, i);
+			}
+		}
+
+		return resultArray;
 	}
 
 	static object CreateEntityFromRow(IRow row, List<string> columnNames, Type entityType, string sheetName)
