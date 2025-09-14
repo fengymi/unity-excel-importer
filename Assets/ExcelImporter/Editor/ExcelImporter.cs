@@ -75,7 +75,7 @@ public class ExcelImporter : AssetPostprocessor
 				var attributes = type.GetCustomAttributes(typeof(ExcelAssetAttribute), false);
 				if(attributes.Length == 0) continue;
 				var attribute = (ExcelAssetAttribute)attributes[0];
-				var info = new ExcelAssetInfo()
+				var info = new ExcelAssetInfo
 				{
 					AssetType = type,
 					Attribute = attribute
@@ -96,7 +96,7 @@ public class ExcelImporter : AssetPostprocessor
 		{
 			asset = ScriptableObject.CreateInstance(assetType.Name);
 			AssetDatabase.CreateAsset((ScriptableObject)asset, assetPath);
-			asset.hideFlags = HideFlags.NotEditable;
+			// asset.hideFlags = HideFlags.NotEditable;
 		}
 
 		return asset;
@@ -266,12 +266,23 @@ public class ExcelImporter : AssetPostprocessor
 		return resultArray;
 	}
 
-	static object CreateEntityFromRow(IRow row, List<string> columnNames, Type entityType, string sheetName)
+	static object CreateEntityFromRow(IRow row, List<string> columnNames, Type entityType, string sheetName, int dynamicTypeIndex = -1)
 	{
 		var entity = Activator.CreateInstance(entityType);
-
 		var fields = entityType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
+		// 根据excel中的type动态指定类型
+		if (dynamicTypeIndex > 0)
+		{
+			var classType = row.GetCell(dynamicTypeIndex)?.StringCellValue;
+			if (classType != null && !string.IsNullOrWhiteSpace(classType))
+			{
+				var tempType = Type.GetType($"{classType}, Assembly-CSharp")!;
+				entity = Activator.CreateInstance(tempType);
+				fields = tempType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			}
+		}
+		
 		for (int i = 0; i < columnNames.Count; i++)
 		{
 			FieldInfo entityField = fields.FirstOrDefault(f => f.Name == columnNames[i]);
@@ -294,9 +305,11 @@ public class ExcelImporter : AssetPostprocessor
 		return entity;
 	}
 
+	private const string DynamicTypeKey = "$type";
 	static object GetEntityListFromSheet(ISheet sheet, Type entityType)
 	{
 		List<string> excelColumnNames = GetFieldNamesFromSheetHeader(sheet);
+		var typeIndex = excelColumnNames.FindIndex(f => Equals(DynamicTypeKey, f));
 
 		Type listType = typeof(List<>).MakeGenericType(entityType);
 		MethodInfo listAddMethod = listType.GetMethod("Add", new Type[] { entityType });
@@ -355,7 +368,7 @@ public class ExcelImporter : AssetPostprocessor
 
 			foundFirstRow = true;
 
-			var entity = CreateEntityFromRow(row, excelColumnNames, entityType, sheet.SheetName);
+			var entity = CreateEntityFromRow(row, excelColumnNames, entityType, sheet.SheetName, typeIndex);
 			listAddMethod.Invoke(list, new object[] { entity });
 		}
 		return list;
